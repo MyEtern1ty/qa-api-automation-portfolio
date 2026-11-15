@@ -1,186 +1,186 @@
-# DummyJSON Products API — Test Cases
+# DummyJSON: тест-кейсы API каталога товаров
 
-**Module:** Products (catalog)  
-**Base URL:** `https://dummyjson.com`  
-**Method:** GET for all cases  
-**Test suite version:** 1.0  
-**Status:** Ready for manual review; not executed  
-**Source of truth:** [Official Products API documentation](https://dummyjson.com/docs/products)  
-**Scope:** API-001 through API-008
+**Модуль:** Каталог товаров (Products)  
+**Базовый URL:** `https://dummyjson.com`  
+**Метод:** GET для всех сценариев  
+**Версия набора:** 1.0  
+**Статус:** Тест-кейсы подготовлены; автоматизированный прогон выполнен отдельно  
+**Источник требований:** [Официальная документация Products API](https://dummyjson.com/docs/products)  
+**Покрытие:** API-001 — API-008
 
-## Common prerequisites
+## Общие предусловия
 
-- Internet access to the public DummyJSON API.
-- Any HTTP client (Postman, curl, browser for GET) capable of reading the HTTP status and JSON response.
-- No authentication is required for the documented public product endpoints.
-- Do not rely on a fixed catalog size, product order without explicit sorting, or an unchanging dataset.
-- Treat a transport outage or rate-limit response as an environment/infrastructure issue, not an API functional assertion.
-- This document defines **test designs, not execution results**. Do not mark a case Passed until it is run.
+- Доступ к публичному API DummyJSON через интернет.
+- HTTP-клиент (например, Postman, curl либо браузер для GET), позволяющий проверить статус ответа и содержимое JSON.
+- Для публичных методов каталога авторизация не требуется.
+- Нельзя рассчитывать на неизменное количество товаров, фиксированный порядок без явной сортировки или постоянство тестовых данных.
+- Сетевые ошибки, недоступность сервиса и ограничение частоты запросов нужно анализировать как возможные проблемы окружения, а не автоматически считать дефектами API.
+- Результаты выполнения тестов не устанавливаются этим документом: статус Passed/Failed назначается только по фактическому прогону.
 
-## Response conventions
+## Общие требования к ответам
 
-For product-list endpoints, the documented response is a JSON object containing `products` (array), `total` (integer), `skip` (integer), and `limit` (integer). Product examples include `id` (integer), `title` (string), `category` (string), and `price` (number).
+В ответах методов получения списка товаров ожидается JSON-объект с полями `products` (массив), `total` (целое число), `skip` (целое число) и `limit` (целое число). Примеры товаров содержат `id` (целое число), `title` (строка), `category` (строка) и `price` (число).
 
-## Test case index
+## Перечень тест-кейсов
 
-| ID | Title | Type | Priority | Endpoint |
+| ID | Название | Тип проверки | Приоритет | Endpoint |
 | --- | --- | --- | --- | --- |
-| API-001 | Retrieve the default product list | Positive | P1 | `GET /products` |
-| API-002 | Retrieve a product by an existing ID | Positive | P1 | `GET /products/1` |
-| API-003 | Retrieve a product by a nonexistent ID | Negative / contract clarification | P1 | `GET /products/999999` |
-| API-004 | Limit the product list to 10 items | Positive / boundary | P1 | `GET /products?limit=10` |
-| API-005 | Skip the first 10 products and return the next 10 | Positive | P1 | `GET /products?limit=10&skip=10` |
-| API-006 | Search products by query | Positive | P2 | `GET /products/search?q=phone` |
-| API-007 | Sort products by ascending price | Positive | P1 | `GET /products?sortBy=price&order=asc` |
-| API-008 | Filter products by a category | Positive | P1 | `GET /products/category/smartphones` |
+| API-001 | Получение списка товаров с параметрами по умолчанию | Позитивная | P1 | `GET /products` |
+| API-002 | Получение существующего товара по ID | Позитивная | P1 | `GET /products/1` |
+| API-003 | Получение несуществующего товара по ID | Негативная; уточнение контракта | P1 | `GET /products/999999` |
+| API-004 | Ограничение выдачи десятью товарами | Позитивная; проверка лимита | P1 | `GET /products?limit=10` |
+| API-005 | Пропуск первых десяти товаров | Позитивная | P1 | `GET /products?limit=10&skip=10` |
+| API-006 | Поиск товаров по запросу | Позитивная | P2 | `GET /products/search?q=phone` |
+| API-007 | Сортировка товаров по возрастанию цены | Позитивная | P1 | `GET /products?sortBy=price&order=asc` |
+| API-008 | Получение товаров заданной категории | Позитивная | P1 | `GET /products/category/smartphones` |
 
 ---
 
-## API-001 — Retrieve the default product list
+## API-001 — Получение списка товаров с параметрами по умолчанию
 
-- **Type / Priority:** Positive / P1
-- **Preconditions:** Common prerequisites; no query parameters.
-- **Request:** `GET https://dummyjson.com/products`
-- **Test data:** None.
-- **Steps:**
-  1. Send the GET request.
-  2. Record the HTTP status and parse the body as JSON.
-  3. Inspect the top-level keys and first returned product.
-- **Expected results:**
-  1. HTTP 200; response body is valid JSON.
-  2. Root is an object with `products` (array), `total` (non-negative integer), `skip` (integer equal to 0), `limit` (integer equal to 30, as documented default).
-  3. `products` contains 30 entries if at least 30 products are available; generally, `len(products) = min(30, total)`.
-  4. Every returned product has an integer `id`, nonempty string `title`, string `category`, and numeric `price`.
-- **Traceability:** Products docs → Get all products.
+- **Тип / приоритет:** Позитивная / P1.
+- **Предусловия:** Общие предусловия; параметры запроса не передаются.
+- **Запрос:** `GET https://dummyjson.com/products`.
+- **Тестовые данные:** Не требуются.
+- **Шаги:**
+  1. Отправить GET-запрос.
+  2. Зафиксировать HTTP-статус и разобрать тело как JSON.
+  3. Проверить поля корневого объекта и первого возвращённого товара.
+- **Ожидаемые результаты:**
+  1. HTTP 200; ответ содержит корректный JSON.
+  2. Корень — объект с полями `products` (массив), `total` (неотрицательное целое), `skip=0`, `limit=30` (значение по умолчанию согласно документации).
+  3. Если доступно не менее 30 товаров, получено 30 элементов; в общем случае `len(products) = min(30, total)`.
+  4. У каждого товара есть целочисленный `id`, непустой строковый `title`, строковый `category` и числовой `price`.
+- **Трассировка:** Документация Products → получение всех товаров.
 
-## API-002 — Retrieve a product by an existing ID
+## API-002 — Получение существующего товара по ID
 
-- **Type / Priority:** Positive / P1
-- **Preconditions:** Product ID `1` exists in the documented example (alternatively, obtain a currently existing ID from API-001 before executing).
-- **Request:** `GET https://dummyjson.com/products/1`
-- **Test data:** `id=1`.
-- **Steps:**
-  1. Send the GET request with an existing ID.
-  2. Parse JSON and inspect product fields.
-- **Expected results:**
-  1. HTTP 200; body is a JSON object, not a list wrapper.
-  2. `id` equals the requested ID (`1`).
-  3. `title` is a nonempty string, `category` is a string, `price` is numeric, `description` is a string.
-- **Traceability:** Products docs → Get a single product.
-- **Note:** If the fixture dataset changes, replace `1` with an ID obtained from the list endpoint.
+- **Тип / приоритет:** Позитивная / P1.
+- **Предусловия:** Товар с ID `1` существует в примере документации; при изменении набора данных можно взять актуальный ID из API-001.
+- **Запрос:** `GET https://dummyjson.com/products/1`.
+- **Тестовые данные:** `id=1`.
+- **Шаги:**
+  1. Отправить GET-запрос с существующим ID.
+  2. Разобрать JSON и проверить поля товара.
+- **Ожидаемые результаты:**
+  1. HTTP 200; тело ответа — JSON-объект товара, а не объект со списком.
+  2. Поле `id` совпадает с запрошенным значением (`1`).
+  3. Поле `title` — непустая строка; `category` и `description` — строки; `price` — число.
+- **Трассировка:** Документация Products → получение одного товара.
+- **Примечание:** При изменении набора тестовых данных заменить `1` на ID из списка товаров.
 
-## API-003 — Retrieve a product by a nonexistent ID
+## API-003 — Получение несуществующего товара по ID
 
-- **Type / Priority:** Negative / P1
-- **Preconditions:** Verify the chosen ID does not exist (e.g., `999999`; do not assume a particular catalog maximum forever).
-- **Request:** `GET https://dummyjson.com/products/999999`
-- **Test data:** `id=999999`.
-- **Steps:**
-  1. Check that the ID is not among available products, or choose a clearly out-of-range ID.
-  2. Send the GET request.
-  3. Inspect the HTTP status and error response.
-- **Proposed expected results (requires contract confirmation):**
+- **Тип / приоритет:** Негативная / P1.
+- **Предусловия:** Убедиться, что выбранного ID нет в каталоге (например, `999999`; нельзя навсегда полагаться на фиксированный максимум ID).
+- **Запрос:** `GET https://dummyjson.com/products/999999`.
+- **Тестовые данные:** `id=999999`.
+- **Шаги:**
+  1. Проверить, что ID отсутствует среди доступных товаров, либо выбрать явно выходящий за диапазон ID.
+  2. Отправить GET-запрос.
+  3. Проверить HTTP-статус и тело ответа с ошибкой.
+- **Предполагаемые ожидаемые результаты (требуется подтверждение контракта):**
   1. HTTP 404 Not Found.
-  2. The body indicates that the requested product was not found and does not return a valid product object with the requested ID.
-- **Specification gap:** The official Products documentation demonstrates successful lookup but does **not** explicitly define the status or JSON schema for an unknown product ID. Record observed behavior and verify the contract before making these assertions mandatory in automated tests.
-- **Traceability:** Products docs → Get a single product (negative behavior not specified).
+  2. В ответе сообщается об отсутствии товара; корректный объект товара с запрошенным ID не возвращается.
+- **Пробел в требованиях:** Официальная документация показывает успешное получение товара, но **не описывает явно** HTTP-статус и схему JSON для неизвестного ID. Перед обязательной автоматической проверкой нужно подтвердить контракт и зафиксировать наблюдаемое поведение.
+- **Трассировка:** Документация Products → получение одного товара (негативное поведение не определено).
 
-## API-004 — Limit the product list to 10 items
+## API-004 — Ограничение выдачи десятью товарами
 
-- **Type / Priority:** Positive, limit boundary / P1
-- **Preconditions:** At least 10 products available in catalog.
-- **Request:** `GET https://dummyjson.com/products?limit=10`
-- **Test data:** `limit=10`, implicit `skip=0`.
-- **Steps:**
-  1. Send GET with `limit=10`.
-  2. Parse JSON and inspect the product list and pagination metadata.
-- **Expected results:**
-  1. HTTP 200; valid JSON list wrapper.
+- **Тип / приоритет:** Позитивная; проверка ограничения / P1.
+- **Предусловия:** В каталоге есть не менее 10 товаров.
+- **Запрос:** `GET https://dummyjson.com/products?limit=10`.
+- **Тестовые данные:** `limit=10`, неявный `skip=0`.
+- **Шаги:**
+  1. Отправить GET-запрос с `limit=10`.
+  2. Проверить JSON, массив товаров и параметры пагинации.
+- **Ожидаемые результаты:**
+  1. HTTP 200; корректный JSON-объект со списком.
   2. `limit=10`, `skip=0`, `total >= 10`.
-  3. Exactly 10 products are returned, each with a unique integer `id`.
-- **Traceability:** Products docs → Limit and skip products.
+  3. Возвращено ровно 10 товаров, у каждого уникальный целочисленный `id`.
+- **Трассировка:** Документация Products → параметры limit и skip.
 
-## API-005 — Skip the first 10 products and return the next 10
+## API-005 — Пропуск первых десяти товаров
 
-- **Type / Priority:** Positive / P1
-- **Preconditions:** At least 20 products available. Execute comparison calls in close succession if catalog changes are possible.
-- **Request:** `GET https://dummyjson.com/products?limit=10&skip=10`
-- **Comparison request:** `GET https://dummyjson.com/products?limit=20&skip=0`
-- **Test data:** `limit=10`, `skip=10`.
-- **Steps:**
-  1. Request the first 20 products as a comparison baseline and record the ordered `id` values.
-  2. Request `limit=10&skip=10`.
-  3. Compare the response metadata and the returned IDs with baseline positions 11–20.
-- **Expected results:**
-  1. Both requests return HTTP 200 and valid JSON.
-  2. Paginated response contains 10 products with `limit=10`, `skip=10`.
-  3. The paginated response IDs match baseline IDs at indices 10–19 (zero-based) in the same order.
-  4. `total` agrees between the two responses if the underlying dataset is unchanged.
-- **Traceability:** Products docs → Limit and skip products.
+- **Тип / приоритет:** Позитивная / P1.
+- **Предусловия:** В каталоге не менее 20 товаров. Сравниваемые запросы выполнять подряд, чтобы снизить влияние изменений данных.
+- **Запрос:** `GET https://dummyjson.com/products?limit=10&skip=10`.
+- **Контрольный запрос:** `GET https://dummyjson.com/products?limit=20&skip=0`.
+- **Тестовые данные:** `limit=10`, `skip=10`.
+- **Шаги:**
+  1. Получить первые 20 товаров контрольным запросом и сохранить порядок их `id`.
+  2. Запросить список с `limit=10&skip=10`.
+  3. Сравнить параметры пагинации и ID полученных товаров с позициями 11–20 контрольной выдачи.
+- **Ожидаемые результаты:**
+  1. Оба запроса возвращают HTTP 200 и корректный JSON.
+  2. В ответе с пагинацией содержится 10 товаров, `limit=10`, `skip=10`.
+  3. ID совпадают с элементами контрольного ответа с индексами 10–19 (при нумерации с нуля), порядок сохранён.
+  4. `total` одинаков в обоих ответах при условии неизменности данных.
+- **Трассировка:** Документация Products → параметры limit и skip.
 
-## API-006 — Search products by query
+## API-006 — Поиск товаров по запросу
 
-- **Type / Priority:** Positive / P2
-- **Preconditions:** Public product search is available.
-- **Request:** `GET https://dummyjson.com/products/search?q=phone`
-- **Test data:** `q=phone` (official example).
-- **Steps:**
-  1. Send GET with the URL-encoded query value `phone`.
-  2. Inspect status, root response structure, and each returned product.
-  3. Record the number of products and total search results.
-- **Expected results:**
-  1. HTTP 200 and valid JSON.
-  2. Response contains `products` (array), `total` (non-negative integer), `skip` and `limit` (integers).
-  3. Search returns at least one product for the documented example query, assuming the example dataset is available.
-  4. Returned products have the documented product fields (`id`, `title`, `category`, `price`).
-- **Specification gap:** The docs do not state which product fields are searched or whether matching is substring-, token-, or fuzzy-based. Do **not** require every product title to contain `phone` (the official example includes results with other titles). Exact relevance semantics need separate contract clarification.
-- **Traceability:** Products docs → Search products.
+- **Тип / приоритет:** Позитивная / P2.
+- **Предусловия:** Публичный метод поиска доступен.
+- **Запрос:** `GET https://dummyjson.com/products/search?q=phone`.
+- **Тестовые данные:** `q=phone` (пример из документации).
+- **Шаги:**
+  1. Отправить GET-запрос с URL-кодированным значением `phone`.
+  2. Проверить статус, структуру ответа и каждый возвращённый товар.
+  3. Зафиксировать число товаров в текущем ответе и общее количество результатов.
+- **Ожидаемые результаты:**
+  1. HTTP 200; корректный JSON.
+  2. Есть `products` (массив), `total` (неотрицательное целое), `skip` и `limit` (целые числа).
+  3. Для примера из документации найден хотя бы один товар, если исходный набор данных доступен.
+  4. Товары содержат описанные в документации поля (`id`, `title`, `category`, `price`).
+- **Пробел в требованиях:** Не указано, по каким полям выполняется поиск и какой алгоритм сопоставления используется (подстрока, отдельные слова, нечёткий поиск). **Нельзя требовать**, чтобы каждый `title` содержал `phone`: в документированном примере есть и другие названия. Точные критерии релевантности нужно уточнять отдельно.
+- **Трассировка:** Документация Products → поиск товаров.
 
-## API-007 — Sort products by ascending price
+## API-007 — Сортировка товаров по возрастанию цены
 
-- **Type / Priority:** Positive / P1
-- **Preconditions:** At least two products are available; use non-filtered catalog.
-- **Request:** `GET https://dummyjson.com/products?sortBy=price&order=asc`
-- **Test data:** `sortBy=price`, `order=asc`.
-- **Steps:**
-  1. Send GET with both sorting parameters.
-  2. Extract `price` values in the order returned.
-  3. Compare each adjacent pair of prices.
-- **Expected results:**
-  1. HTTP 200; valid JSON object with product list.
-  2. Every product has a numeric `price`.
-  3. Prices are nondecreasing: for every adjacent pair, `price[i] <= price[i + 1]`.
-  4. Equal prices may appear in any relative order; no secondary sort order is asserted.
-- **Traceability:** Products docs → Sort products (`sortBy` accepts field names; `order` accepts `asc`/`desc`).
+- **Тип / приоритет:** Позитивная / P1.
+- **Предусловия:** В каталоге минимум два товара; фильтры не применены.
+- **Запрос:** `GET https://dummyjson.com/products?sortBy=price&order=asc`.
+- **Тестовые данные:** `sortBy=price`, `order=asc`.
+- **Шаги:**
+  1. Отправить GET-запрос с двумя параметрами сортировки.
+  2. Получить значения `price` в порядке выдачи.
+  3. Сравнить каждую соседнюю пару цен.
+- **Ожидаемые результаты:**
+  1. HTTP 200; корректный JSON-объект с массивом товаров.
+  2. `price` каждого товара — число.
+  3. Цены идут по неубыванию: для соседних элементов `price[i] <= price[i + 1]`.
+  4. Относительный порядок товаров с одинаковой ценой не фиксируется; дополнительная сортировка не проверяется.
+- **Трассировка:** Документация Products → сортировка (`sortBy` — поле; `order` — `asc` или `desc`).
 
-## API-008 — Filter products by category
+## API-008 — Получение товаров заданной категории
 
-- **Type / Priority:** Positive / P1
-- **Preconditions:** Category `smartphones` appears in `GET /products/category-list` (official example).
-- **Request:** `GET https://dummyjson.com/products/category/smartphones`
-- **Test data:** category slug `smartphones`.
-- **Steps:**
-  1. Optionally confirm the slug appears in `GET /products/category-list`.
-  2. Send GET to the category endpoint.
-  3. Inspect response metadata and categories of returned products.
-- **Expected results:**
-  1. HTTP 200; valid JSON with `products` (array), `total`, `skip`, `limit`.
-  2. At least one product is returned for this documented example category, assuming the example dataset is available.
-  3. Every returned item has `category = "smartphones"`.
-  4. `total` is at least the number of returned products.
-- **Traceability:** Products docs → Get products by a category / Get products category list.
+- **Тип / приоритет:** Позитивная / P1.
+- **Предусловия:** Категория `smartphones` присутствует в `GET /products/category-list` (пример документации).
+- **Запрос:** `GET https://dummyjson.com/products/category/smartphones`.
+- **Тестовые данные:** Код категории `smartphones`.
+- **Шаги:**
+  1. При необходимости убедиться, что категория указана в `GET /products/category-list`.
+  2. Отправить GET-запрос к методу категории.
+  3. Проверить параметры ответа и категории всех найденных товаров.
+- **Ожидаемые результаты:**
+  1. HTTP 200; корректный JSON с `products` (массив), `total`, `skip`, `limit`.
+  2. Для категории из примера найден хотя бы один товар, если тестовые данные доступны.
+  3. У каждого товара `category = "smartphones"`.
+  4. `total` не меньше числа элементов в ответе.
+- **Трассировка:** Документация Products → товары категории / список категорий.
 
 ---
 
-## Review and automation notes
+## Замечания для ревью и автоматизации
 
-1. **API-003**: Confirm the undocumented 404/error-body contract before promoting its expected results to automated pass/fail assertions.
-2. **API-006**: Search relevance is only partially specified. Validate success, shape, and nonempty documented example; do not assume title-only matching.
-3. **Catalog drift**: Prefer schema checks and relational assertions over hardcoded catalog totals, complete product names, or specific price values.
-4. **Future enhancements**: Add parametrized boundary cases for `limit`/`skip`, zero results, malformed IDs, combined filtering and sorting, and response schema checks in separate test design iterations.
-5. **Execution**: These cases have not yet been run; there are no Pass/Fail results at the time of writing.
+1. **API-003:** Не включать обязательные проверки 404 и схемы ошибки, пока контракт не подтверждён.
+2. **API-006:** Документация не описывает точный алгоритм поиска. Проверять статус, структуру и непустой результат для документированного примера, без предположения о совпадении только с названием.
+3. **Изменение каталога:** Предпочитать проверки схемы и взаимосвязанных значений жёстко заданному количеству товаров, названиям и ценам.
+4. **Будущие сценарии:** Отдельно добавить параметризованные граничные значения `limit`/`skip`, пустую выдачу, некорректные ID, комбинации фильтрации и сортировки, проверку JSON-схем.
+5. **Прогоны:** Текущий документ описывает сценарии, но не фиксирует их результаты. Для автотестов есть отдельные отчёты GitHub Actions.
 
-## References
+## Источники
 
-- [DummyJSON — Products API](https://dummyjson.com/docs/products)
-- [DummyJSON — API overview](https://dummyjson.com/docs)
+- [DummyJSON — документация Products API](https://dummyjson.com/docs/products)
+- [DummyJSON — общая документация API](https://dummyjson.com/docs)
