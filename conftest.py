@@ -1,4 +1,4 @@
-"""Shared HTTP client for the public DummyJSON Products API."""
+"""Общий HTTP-клиент для публичного API каталога товаров DummyJSON."""
 
 import os
 

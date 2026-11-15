@@ -1,22 +1,37 @@
-# QA API Automation Portfolio
+# Портфолио автоматизации API-тестирования
 
-This repository is a personal QA portfolio project focused on automated REST API testing.
+Учебный QA-проект с автоматизированным тестированием публичного REST API [DummyJSON](https://dummyjson.com/docs/products).
 
-## Planned technologies
+## Используемые технологии
 
 - Python
 - Pytest
 - Requests
 - GitHub Actions
 
-## Project goals
+## Цели проекта
 
-- Practice Git and GitHub workflows
-- Design and document API test scenarios
-- Implement automated API checks
-- Run tests in GitHub Actions
-- Review test results and reports
+- Освоить рабочие процессы Git и GitHub.
+- Проектировать и документировать API-проверки.
+- Автоматизировать проверки API на основе тест-кейсов.
+- Запускать тесты с помощью GitHub Actions.
+- Анализировать результаты прогонов и отчёты.
 
-## Status
+## Структура
 
-Project initialization.
+- [Тест-кейсы API-001–API-008](docs/test-cases/products.md) — сценарии проверки каталога товаров.
+- [Инструкция по запуску](docs/automation.md) — локальный запуск и GitHub Actions.
+- `tests/test_products.py` — автоматизированные API-проверки.
+- `.github/workflows/api-tests.yml` — конфигурация CI.
+
+## Текущее состояние
+
+Реализованы 8 тестовых функций: 7 активных и 1 пропущенная (API-003, до уточнения контракта ошибки). Первый запуск GitHub Actions завершился с результатом **7 passed, 1 skipped, 0 failed**. Результаты следующих запусков необходимо проверять отдельно.
+
+## Как запустить
+
+Подробные инструкции приведены в [руководстве по автоматизации](docs/automation.md).
+
+## Язык документации
+
+Описания, тест-кейсы, комментарии и инструкции ведутся на русском языке. Идентификаторы API, названия файлов, команды и параметры запросов сохраняются в исходном техническом виде.

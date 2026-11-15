@@ -1,7 +1,7 @@
-"""API-001–API-008: DummyJSON products contract/integration checks.
+"""API-001–API-008: интеграционные проверки каталога DummyJSON.
 
-The negative ID contract (API-003) is deliberately skipped until confirmed.
-See docs/test-cases/products.md for full manual test designs.
+API-003 пока пропущен: контракт ошибки для неизвестного ID не подтверждён.
+Подробные тест-кейсы находятся в docs/test-cases/products.md.
 """
 
 import pytest
@@ -22,7 +22,7 @@ def assert_list_response(response):
     assert isinstance(body, dict)
     assert isinstance(body.get("products"), list)
     for field in ("total", "skip", "limit"):
-        assert type(body.get(field)) is int, f"{field} is not an integer"
+        assert type(body.get(field)) is int, f"Поле {field} должно быть целым числом"
         assert body[field] >= 0
     for product in body["products"]:
         assert_product(product)
@@ -30,7 +30,7 @@ def assert_list_response(response):
 
 
 def test_api_001_get_default_products(api_client):
-    """API-001: default list contains up to 30 products."""
+    """API-001: по умолчанию возвращается не более 30 товаров."""
     body = assert_list_response(api_client("/products"))
     assert body["skip"] == 0
     assert body["limit"] == 30
@@ -38,7 +38,7 @@ def test_api_001_get_default_products(api_client):
 
 
 def test_api_002_get_product_by_existing_id(api_client):
-    """API-002: single product has matching ID and documented fields."""
+    """API-002: ответ содержит товар с запрошенным ID и нужными полями."""
     response = api_client("/products/1")
     assert response.status_code == 200, response.text[:500]
     product = response.json()
@@ -48,16 +48,16 @@ def test_api_002_get_product_by_existing_id(api_client):
 
 
 @pytest.mark.contract_pending
-@pytest.mark.skip(reason="API-003: 404 status/error schema for unknown product ID is not documented; confirm before enforcing")
+@pytest.mark.skip(reason="API-003: статус 404 и схема ошибки для неизвестного ID не задокументированы; требуется подтверждение контракта")
 def test_api_003_get_nonexistent_product(api_client):
-    """API-003: proposed behavior, not yet an agreed API contract."""
+    """API-003: предполагаемое поведение, пока не подтверждённое контрактом API."""
     response = api_client("/products/999999")
     assert response.status_code == 404
     assert response.json().get("message")
 
 
 def test_api_004_limit_products(api_client):
-    """API-004: limit=10 returns 10 unique products."""
+    """API-004: limit=10 возвращает десять товаров с уникальными ID."""
     body = assert_list_response(api_client("/products", limit=10))
     assert body["total"] >= 10
     assert body["skip"] == 0
@@ -68,7 +68,7 @@ def test_api_004_limit_products(api_client):
 
 
 def test_api_005_products_pagination(api_client):
-    """API-005: skip=10 selects positions 11–20 from the same ordering."""
+    """API-005: skip=10 возвращает товары с позиций 11–20 исходной выдачи."""
     baseline = assert_list_response(api_client("/products", limit=20, skip=0))
     assert baseline["total"] >= 20
     body = assert_list_response(api_client("/products", limit=10, skip=10))
@@ -82,9 +82,9 @@ def test_api_005_products_pagination(api_client):
 
 
 def test_api_006_search_products(api_client):
-    """API-006: documented 'phone' search returns structured nonempty results.
+    """API-006: поиск по phone возвращает непустой результат нужной структуры.
 
-    The matching algorithm is not documented: do not assert title substring.
+    Алгоритм поиска не описан; совпадение подстроки в title не проверяется.
     """
     body = assert_list_response(api_client("/products/search", q="phone"))
     assert body["total"] > 0
@@ -94,7 +94,7 @@ def test_api_006_search_products(api_client):
 
 
 def test_api_007_products_sorted_by_ascending_price(api_client):
-    """API-007: ascending price is nondecreasing (ties permitted)."""
+    """API-007: цены отсортированы по неубыванию; одинаковые цены допустимы."""
     body = assert_list_response(api_client("/products", sortBy="price", order="asc"))
     prices = [product["price"] for product in body["products"]]
     assert len(prices) >= 2
@@ -102,7 +102,7 @@ def test_api_007_products_sorted_by_ascending_price(api_client):
 
 
 def test_api_008_products_filtered_by_category(api_client):
-    """API-008: category endpoint returns only smartphones."""
+    """API-008: метод категории возвращает только смартфоны."""
     slug = "smartphones"
     categories_response = api_client("/products/category-list")
     assert categories_response.status_code == 200
