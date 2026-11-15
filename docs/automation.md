@@ -1,23 +1,23 @@
-# Running the DummyJSON API tests
+# Запуск автотестов DummyJSON API
 
-These are **live integration tests** against the public [DummyJSON API](https://dummyjson.com/docs/products). The service requires Internet access; network failures do not automatically indicate product defects.
+Проект содержит **интеграционные тесты**, которые отправляют реальные запросы к публичному [DummyJSON API](https://dummyjson.com/docs/products). Для запуска требуется интернет. Сетевые ошибки не всегда означают дефект тестируемого API.
 
-## Automated coverage
+## Автоматизированное покрытие
 
-- API-001 Default product list
-- API-002 Product lookup by existing ID
-- API-003 Nonexistent product ID — **skipped until the undocumented 404/error-body contract is confirmed**
-- API-004 Limit to 10 items
-- API-005 Pagination with limit/skip
-- API-006 Search for `phone` (response contract, not title-only matching)
-- API-007 Ascending price sort
-- API-008 Category filter
+- **API-001:** Получение списка товаров по умолчанию.
+- **API-002:** Получение существующего товара по ID.
+- **API-003:** Несуществующий ID — **пропущен до уточнения контракта ответа 404 и тела ошибки**.
+- **API-004:** Ограничение числа товаров до десяти.
+- **API-005:** Пагинация с `limit` и `skip`.
+- **API-006:** Поиск по `phone` (проверяется контракт ответа, но не совпадение только с названием).
+- **API-007:** Сортировка по возрастанию цены.
+- **API-008:** Фильтрация по категории.
 
-Seven tests are enabled and one is explicitly skipped. None have been declared Passed before execution. All are linked to IDs in [the manual test cases](test-cases/products.md).
+Всего создано восемь тестовых функций: семь выполняются, одна помечена как пропущенная. Они связаны с [ручными тест-кейсами](test-cases/products.md) по ID.
 
-## Local run
+## Локальный запуск
 
-Install Python 3.12 or later, then run these commands in the repository root:
+Установить Python версии 3.12 или новее. Выполнить команды из корня репозитория:
 
 ```bash
 python -m venv .venv
@@ -27,18 +27,20 @@ python -m pip install -r requirements.txt
 python -m pytest -v
 ```
 
-Set `DUMMYJSON_BASE_URL` to override the default `https://dummyjson.com`, if needed.
+При необходимости указать переменную окружения `DUMMYJSON_BASE_URL` для замены адреса по умолчанию `https://dummyjson.com`.
 
-## GitHub Actions
+## Запуск через GitHub Actions
 
-Go to **Actions → DummyJSON API tests → Run workflow** to run the tests manually. A run also starts when a PR targets this repository or commits are pushed to `main`.
+Открыть вкладку **Actions → Тестирование DummyJSON API → Run workflow** для ручного запуска. Проверки также запускаются при открытии/обновлении Pull Request и отправке изменений в `main`.
 
-View the log under the `products-api` job. Download the `pytest-junit-results` artifact to inspect a machine-readable JUnit XML report (retained for 14 days).
+Чтобы увидеть результаты, открыть задачу `products-api` в журнале запуска. Артефакт `pytest-junit-results` содержит отчёт в формате JUnit XML и хранится 14 дней.
 
-## Interpretation
+## Как читать результаты
 
-- **Passed:** assertion matched the live API response.
-- **Failed:** an assertion, transport request, or JSON parsing failed; inspect the cause rather than assuming the API has a defect.
-- **Skipped:** API-003 remains pending API contract clarification.
+- **Passed (успешно):** утверждения автотеста соответствуют фактическому ответу API.
+- **Failed (ошибка):** проблема с утверждением, HTTP-запросом или разбором JSON. Сначала нужно установить причину, а не считать это дефектом сервиса.
+- **Skipped (пропущено):** API-003 пока ожидает уточнения контракта.
 
-Do not commit tokens or credentials. The public product endpoints need no authentication.
+Первый CI-прогон дал результат **7 Passed, 1 Skipped, 0 Failed**. Это исторический результат; актуальный статус нужно проверять в GitHub Actions.
+
+Не сохранять токены, пароли и другие секреты в репозитории. Для публичных методов каталога авторизация не нужна.
